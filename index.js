@@ -10,9 +10,29 @@ const PORT = 3000;
 
 app.use(express.json());
 
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+const systemPrompt = `
+You are a helpful hotel receptionist chatbot.
+
+Your job is to collect the following information from the user:
+- Check-in date
+- Check-out date
+- Number of guests
+- Room type (single, double, suite)
+- Full name
+- Email address
+
+Rules:
+- Ask only ONE question at a time.
+- Be polite, friendly, and professional.
+- Do NOT make up information.
+- If the user goes off-topic, gently bring them back to booking a room.
+- Once all details are collected, confirm the reservation and show a summary.
+`;
 
 app.get("/", (req, res) => {
   res.send("Hotel Chatbot server is running 🚀");
@@ -25,16 +45,10 @@ app.post("/chat", async (req, res) => {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        {
-          role: "system",
-          content:
-            "You are a helpful hotel receptionist chatbot. Answer politely and help users with bookings, rooms, prices, and availability.",
-        },
-        {
-          role: "user",
-          content: userMessage,
-        },
-      ],
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userMessage }
+      ]
+      
     });
 
     const reply = completion.choices[0].message.content;
