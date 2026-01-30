@@ -1,3 +1,5 @@
+const { createClient } = require("@supabase/supabase-js");
+
 let bookingState = {
   checkIn: null,
   checkOut: null,
@@ -25,6 +27,12 @@ app.use(express.json());
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
+
 
 const systemPrompt = `
 You are a helpful hotel receptionist chatbot.
@@ -161,6 +169,52 @@ if (extractedData) {
 
     // 5️⃣ Bot cevabını hafızaya ekle
     conversationHistory.push({ role: "assistant", content: aiReply });
+
+    // ✅ If user confirms, save to DB
+if (
+  bookingState.checkIn &&
+  bookingState.checkOut &&
+  bookingState.guests &&
+  bookingState.roomType &&
+  bookingState.name &&
+  bookingState.email &&
+  userMessage.toLowerCase().includes("yes")
+) {
+  const { data, error } = await supabase.from("bookings").insert([
+    {
+      check_in: bookingState.checkIn,
+      check_out: bookingState.checkOut,
+      guests: bookingState.guests,
+      room_type: bookingState.roomType,
+      name: bookingState.name,
+      email: bookingState.email
+    }
+  ]);
+
+  if (error) {
+    console.error("Supabase insert error:", error.message);
+    return res.json({
+      reply: "Something went wrong saving your reservation 😔"
+    });
+  }
+
+  // 🎉 Reset state
+  bookingState = {
+    checkIn: null,
+    checkOut: null,
+    guests: null,
+    roomType: null,
+    name: null,
+    email: null
+  };
+
+  conversationHistory = [];
+
+  return res.json({
+    reply: "🎉 Your reservation is confirmed! We’ve saved your booking. See you soon!"
+  });
+}
+
 
     res.json({ reply: aiReply, bookingState });
   } catch (error) {
