@@ -1,4 +1,10 @@
-const { createClient } = require("@supabase/supabase-js");
+console.log("Index.js started ✅");
+
+require("dotenv").config();
+
+//const { createClient } = require("@supabase/supabase-js");
+const supabase = require("./supabase");
+
 
 let bookingState = {
   checkIn: null,
@@ -11,9 +17,7 @@ let bookingState = {
 
 let conversationHistory = [];
 
-console.log("Index.js started ✅");
 
-require("dotenv").config();
 
 const express = require("express");
 const OpenAI = require("openai");
@@ -28,10 +32,6 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
 
 
 const systemPrompt = `
@@ -199,21 +199,73 @@ if (
   }
 
   // 🎉 Reset state
-  bookingState = {
+  /*bookingState = {
     checkIn: null,
     checkOut: null,
     guests: null,
     roomType: null,
     name: null,
     email: null
-  };
+  };*/
 
-  conversationHistory = [];
+  function isBookingComplete(state) {
+    return (
+      state.checkIn &&
+      state.checkOut &&
+      state.guests &&
+      state.roomType &&
+      state.name &&
+      state.email
+    );
+  }
+  
 
-  return res.json({
-    reply: "🎉 Your reservation is confirmed! We’ve saved your booking. See you soon!"
-  });
+  //conversationHistory = [];
+  if (
+    isBookingComplete(bookingState) &&
+    userMessage.toLowerCase().includes("yes")
+  ) {
+    const { error } = await supabase
+      .from("bookings")
+      .insert([
+        {
+          check_in: bookingState.checkIn,
+          check_out: bookingState.checkOut,
+          guests: Number(bookingState.guests),
+          room_type: bookingState.roomType,
+          name: bookingState.name,
+          email: bookingState.email,
+          status: "pending"
+        }
+      ]);
+  
+    if (error) {
+      console.error("❌ Supabase insert error:", error.message);
+      return res.json({
+        reply: "Something went wrong saving your reservation 😔"
+      });
+    }
+  
+    // 🧹 RESET
+    bookingState = {
+      checkIn: null,
+      checkOut: null,
+      guests: null,
+      roomType: null,
+      name: null,
+      email: null
+    };
+  
+    conversationHistory = [];
+  
+    return res.json({
+      reply: "🎉 Your reservation is confirmed! We’ve saved your booking."
+    });
+  }
+  
 }
+
+
 
 
     res.json({ reply: aiReply, bookingState });
