@@ -51,6 +51,13 @@ Rules:
 - Do NOT make up information.
 - If the user goes off-topic, gently bring them back to booking a room.
 - Once all details are collected, confirm the reservation and show a summary.
+
+IMPORTANT:
+- When all booking details are collected, show a summary.
+- DO NOT confirm or finalize the reservation yourself.
+- Always ask the user to reply with "YES" to confirm or "NO" to make changes.
+- Only after the user says YES will the reservation be completed.
+
 `;
 
 
@@ -171,7 +178,7 @@ if (extractedData) {
     conversationHistory.push({ role: "assistant", content: aiReply });
 
     // ✅ If user confirms, save to DB
-if (
+/*if (
   bookingState.checkIn &&
   bookingState.checkOut &&
   bookingState.guests &&
@@ -196,7 +203,7 @@ if (
     return res.json({
       reply: "Something went wrong saving your reservation 😔"
     });
-  }
+  }*/
 
   // 🎉 Reset state
   /*bookingState = {
@@ -263,7 +270,7 @@ if (
     });
   }
   
-}
+
 
 
 
