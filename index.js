@@ -25,7 +25,12 @@ const OpenAI = require("openai");
 const app = express();
 const PORT = 3000;
 
+const cors = require("cors");
+app.use(cors());
+
 app.use(express.json());
+
+
 
 
 const openai = new OpenAI({
@@ -67,6 +72,9 @@ app.get("/", (req, res) => {
 
 app.post("/chat", async (req, res) => {
   const userMessage = req.body.message;
+  
+  console.log("📩 Incoming message:", req.body);
+  
 
   try {
     //Kullanıcının mesajını hafızaya ekle
@@ -247,3 +255,6 @@ if (extractedData) {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
+
+
