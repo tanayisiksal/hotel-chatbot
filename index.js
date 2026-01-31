@@ -69,7 +69,7 @@ app.post("/chat", async (req, res) => {
   const userMessage = req.body.message;
 
   try {
-    // 1️⃣ Kullanıcının mesajını hafızaya ekle
+    //Kullanıcının mesajını hafızaya ekle
     conversationHistory.push({ role: "user", content: userMessage });
 
     // 2️⃣ ========== CALL 1: NORMAL CHAT CEVABI ==========
@@ -136,9 +136,6 @@ try {
 } catch (e) {
   console.log("Extraction JSON parse failed (normal sometimes)");
 }
-
-
-    // 4️⃣ bookingState'i güncelle
   
     // 4️⃣ bookingState'i güncelle
 
@@ -178,42 +175,6 @@ if (extractedData) {
     conversationHistory.push({ role: "assistant", content: aiReply });
 
     // ✅ If user confirms, save to DB
-/*if (
-  bookingState.checkIn &&
-  bookingState.checkOut &&
-  bookingState.guests &&
-  bookingState.roomType &&
-  bookingState.name &&
-  bookingState.email &&
-  userMessage.toLowerCase().includes("yes")
-) {
-  const { data, error } = await supabase.from("bookings").insert([
-    {
-      check_in: bookingState.checkIn,
-      check_out: bookingState.checkOut,
-      guests: bookingState.guests,
-      room_type: bookingState.roomType,
-      name: bookingState.name,
-      email: bookingState.email
-    }
-  ]);
-
-  if (error) {
-    console.error("Supabase insert error:", error.message);
-    return res.json({
-      reply: "Something went wrong saving your reservation 😔"
-    });
-  }*/
-
-  // 🎉 Reset state
-  /*bookingState = {
-    checkIn: null,
-    checkOut: null,
-    guests: null,
-    roomType: null,
-    name: null,
-    email: null
-  };*/
 
   function isBookingComplete(state) {
     return (
